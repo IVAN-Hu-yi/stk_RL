@@ -1,9 +1,6 @@
 from typing import List, Callable
 from bbrl.agents import Agents, Agent
 import gymnasium as gym
-from bbrl.agents.gymnasium import ParallelGymAgent, make_env
-from bbrl.envs.wrappers.agent_spec import AgentSpec
-from functools import partial
 # Imports our Actor class
 # IMPORTANT: note the relative import
 from .actors import Actor, MyWrapper, ArgmaxActor, SamplingActor
@@ -23,30 +20,6 @@ def get_wrappers() -> List[Callable[[gym.Env], gym.Wrapper]]:
         # Example of a custom wrapper
         lambda env: MyWrapper(env, option="1")
     ]
-make_stkenv = partial(
-    make_env,
-    env_name,
-    wrappers=get_wrappers(),
-    render_mode=None,
-    autoreset=True,
-    agent=AgentSpec(use_ai=False, name=player_name),
-)
-
-env_agent = ParallelGymAgent(make_stkenv, 1)
-env = env_agent.envs[0]
-## Required parameters
-seq_obs_keys = ['items_position', 'items_type', 'karts_position', 'paths_distance', 'paths_end', 'paths_start', 'paths_width']
-if torch.cuda.is_available():
-    device = torch.device("cuda")
-elif torch.backends.mps.is_available():
-    device = torch.device("mps")
-else:
-    device = torch.device("cpu")        
-seq_raw_dims = {key:None for key in seq_obs_keys}
-for key, space in env.observation_space.items():
-    if key in seq_obs_keys:
-        seq_raw_dims[key] = space.feature_space.shape
-dfconfig = ppoconfig(device, seq_raw_dims).config
 
 def get_actor(
     state: dict | None,
@@ -65,7 +38,7 @@ def get_actor(
     """
     kwargs = {
         algo: 'PPO',
-        config: dfconfig,
+        config: config,
         device: device
     }
     actor = Actor(observation_space, action_space, **kwargs)

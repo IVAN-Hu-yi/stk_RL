@@ -39,7 +39,7 @@ class PPO(RLAlgorithm):
         else:
             return (
                 policy_output.action,
-                policy_output.new_hidden
+                policy_output.new_hidden,
                 policy_output.extra["distribution"]
             )
 

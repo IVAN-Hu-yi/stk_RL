@@ -6,30 +6,30 @@ class ppoconfig:
 
         self.device = device
         Lmax = 32
-        sequence_length = 128
-        batch_size = 32
+        sequence_length = 32
+        batch_size = 16
         update_interval = sequence_length * batch_size
         self.config = {
             "value_config": {
-                "hidden_size": [128, 64],
+                "hidden_size": [64, 32],
                 "hidden_activation": ["relu", "relu"],
                 "output_activation": [""],
                 "lr": 1e-4
             },
             "policy_config": {
                 "disc_action": {
-                    "hidden_size": [128, 64],
+                    "hidden_size": [64, 32],
                     "hidden_activation": ["relu", "relu"],
                     "output_activation": [""]
                 },
                 "cont_action": {
                     "steer":{ 
-                    "hidden_size": [128, 64],
+                    "hidden_size": [64, 32],
                     "hidden_activation": ["relu", "relu"],
                     "output_activation": [""]
                     },
                     "acceleration":{ 
-                    "hidden_size": [128, 64],
+                    "hidden_size": [64, 32],
                     "hidden_activation": ["relu", "relu"],
                     "output_activation": [""]
                     },
@@ -38,21 +38,21 @@ class ppoconfig:
             },
             'obsEncoder': {
                 'boxEncoder': {
-                    'output_dim': 128,
-                    'hidden_size': [256, 256],
+                    'output_dim': 32,
+                    'hidden_size': [128, 64],
                     'hidden_activation': ['relu', 'relu'],
                     'output_activation': ['Linear']
                 },
                 'seqEncoder': {
-                    'd_model': 128,
-                    'n_heads': 4,
+                    'd_model': 64,
+                    'n_heads': 2,
                     'n_layers': 2,
                     'dropout': 0.1,
                     'use_layer_norm': True
                 }
             },
             'ReplayBuffer': {
-                'capacity': 1e6,
+                'capacity': 1e5,
                 'sequence_length': sequence_length,
                 'Lmax': Lmax,
                 'device': device

@@ -1,11 +1,14 @@
 from typing import List, Callable
 from bbrl.agents import Agents, Agent
 import gymnasium as gym
-
+from bbrl.agents.gymnasium import ParallelGymAgent, make_env
+from bbrl.envs.wrappers.agent_spec import AgentSpec
+from functools import partial
 # Imports our Actor class
 # IMPORTANT: note the relative import
 from .actors import Actor, MyWrapper, ArgmaxActor, SamplingActor
 from config import ppoconfig
+import torch
 
 #: The base environment name (you can change that)
 env_name = "supertuxkart/full-v0"
@@ -13,6 +16,24 @@ env_name = "supertuxkart/full-v0"
 #: Player name (you must change that)
 player_name = "Example"
 
+def get_wrappers() -> List[Callable[[gym.Env], gym.Wrapper]]:
+    """Returns a list of additional wrappers to be applied to the base
+    environment"""
+    return [
+        # Example of a custom wrapper
+        lambda env: MyWrapper(env, option="1")
+    ]
+make_stkenv = partial(
+    make_env,
+    env_name,
+    wrappers=get_wrappers(),
+    render_mode=None,
+    autoreset=True,
+    agent=AgentSpec(use_ai=False, name=player_name),
+)
+
+env_agent = ParallelGymAgent(make_stkenv, 1)
+env = env_agent.envs[0]
 ## Required parameters
 seq_obs_keys = ['items_position', 'items_type', 'karts_position', 'paths_distance', 'paths_end', 'paths_start', 'paths_width']
 if torch.cuda.is_available():
@@ -27,19 +48,13 @@ for key, space in env.observation_space.items():
         seq_raw_dims[key] = space.feature_space.shape
 dfconfig = ppoconfig(device, seq_raw_dims).config
 
-def get_wrappers() -> List[Callable[[gym.Env], gym.Wrapper]]:
-    """Returns a list of additional wrappers to be applied to the base
-    environment"""
-    return [
-        # Example of a custom wrapper
-        lambda env: MyWrapper(env, option="1")
-    ]
-
-
 def get_actor(
     state: dict | None,
     observation_space: gym.spaces.Space,
     action_space: gym.spaces.Space,
+    algo,
+    config,
+    device
 ) -> Agent:
     """Creates a new actor (BBRL agent) that write into `action`
 

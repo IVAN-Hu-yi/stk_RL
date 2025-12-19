@@ -51,7 +51,7 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
     print(f"PPO Config: {dfconfig}")
 
-    actor = Actor('PPO', dfconfig, device)
+    actor = Actor(None, None, 'PPO', dfconfig, device)
     buffer = sequenceReplayBuffer(**dfconfig['ReplayBuffer'])
     train_cofig = dfconfig['training_config'] 
     pbar = tqdm(total=train_cofig['max_epochs']*1500, desc=f"Training Actor")

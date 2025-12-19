@@ -56,37 +56,24 @@ class MLPPolicyModule(nn.Module):
         """
         actions = {}
         entropies = {}
-        log_prob = {} 
+        log_prob = {}
+        distributions = {}
         for key in self.discrete_action_keys :
-            # if not torch.isfinite(fused_emb).all():
-            #     print("NaNs/Infs in fused_emb")
-            #     print("min/max:", fused_emb.min().item(), fused_emb.max().item())
-            #     raise RuntimeError
             action_logits = self.action_heads[key](fused_emb).squeeze(-1)
-            # print(
-            #     "logits stats:",
-            #     action_logits.min().item(),
-            #     action_logits.max().item(),
-            #     torch.isnan(action_logits).any().item()
-            # )
             out = self.action_heads[key](fused_emb)
-            # if not torch.isfinite(out).all():
-            #     print("NaNs in action head output")
-            #     for n, p in self.action_heads[key].named_parameters():
-            #         if not torch.isfinite(p).all():
-            #             print("NaNs in parameter:", n)
-            #     raise RuntimeError
             action_logits = torch.clamp(action_logits, -20.0, 20.0)
             dist = D.Bernoulli(logits=action_logits)
             actions[key] = dist.sample()
             entropies[key] = dist.entropy()
             log_prob[key] = dist.log_prob(actions[key])
+            distributions[key] = dist
         for key in self.continuous_action_keys:
             action_mean = self.action_heads[key](fused_emb)
             action_logstd = self.logstds[key].log_std.view(1, 1, 1).expand_as(action_mean)
             dist = D.Normal(action_mean, torch.exp(action_logstd))
             entropies[key] = dist.entropy().sum(dim=-1)
             action = dist.sample()
+            distributions[key] = dist
             if key == 'steer':
                 actions[key] = torch.tanh(action)
                 log_prob[key] = cont_log_prob(action, action_mean, action_logstd, self.device).contiguous()
@@ -98,5 +85,5 @@ class MLPPolicyModule(nn.Module):
             log_prob=log_prob,
             entropy=entropies,
             new_hidden=None,
-            extra={}
+            extra={"distribution": distributions}
         )    

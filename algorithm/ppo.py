@@ -40,6 +40,7 @@ class PPO(RLAlgorithm):
             return (
                 policy_output.action,
                 policy_output.new_hidden
+                policy_output.extra["distribution"]
             )
 
     def _compute_gae(self, deltas, dones, gamma, lam):

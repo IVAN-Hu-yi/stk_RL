@@ -23,7 +23,7 @@ class MyWrapper(gym.ActionWrapper):
 class Actor(Agent):
     """Computes probabilities over action"""
 
-    def __init__(self, algo, config, device):
+    def __init__(self, observation_space, action_space, algo, config, device):
         super().__init__()
 
         self.policyHead = MLPPolicyModule(config, device)
@@ -38,32 +38,31 @@ class Actor(Agent):
         AlgorithmClass = get_algorithm(algo)
         self.algo = AlgorithmClass(agent=self, config=config)
 
-    def forward(self, t: int, Batch):
-        # Computes probabilities over actions
-        fused_emb_value = self.value_obsEncoder(Batch)
-        fused_emb_policy = self.policy_obsEncoder(Batch)
-        value_estimate = self.valueHead(fused_emb_value)
-        policy_output = self.policyHead(fused_emb_policy)
-        
-        return torch.exp(policy_output.log_porb)
+    def forward(self, t: int, obs):
+        self.set(("obs", t), obs)
+        outputs = self.algo.select_action(obs, eval_mode=True)
+        distribution = outputs[2]
+        self.set(("action", t), outputs[0])
+        self.set(("distribution", t), distribution)
+        return distribution
     
-    def get_value(self, t: int, Batch):
-        fused_emb_value = self.value_obsEncoder(Batch)
-        value_estimate = self.valueHead(fused_emb_value)
-        return value_estimate
-    
-    def get_action_variables(self, t: int, Batch):
-        fused_emb_policy = self.policy_obsEncoder(Batch)
-        policy_output = self.policyHead(fused_emb_policy)
-        return policy_output
-
 class ArgmaxActor(Agent):
     """Actor that computes the action"""
 
-    def forward(self, t: int):
+    def forward(self, t: int, distDict=None):
         # Selects the best actions according to the policy
-        raise NotImplementedError()
-
+        distDict = self.get(("distribution", t))
+        actions = {}
+        for key, dist in distDict.items():
+            elif isinstance(dist, torch.distributions.Bernoulli):
+                actions[key] = (dist.logits >0).long()
+            elif isinstance(dist, torch.distributions.Normal):
+                actions[key] = dist.mean
+                if key == 'steer':
+                    actions[key] = torch.tanh(actions[key])
+                else:
+                    actions[key] = (torch.tanh(actions[key])+1)/2
+        return self.set(("action", t), actions)
 
 class SamplingActor(Agent):
     """Just sample random actions"""

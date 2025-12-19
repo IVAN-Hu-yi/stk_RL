@@ -54,7 +54,7 @@ class ArgmaxActor(Agent):
         distDict = self.get(("distribution", t))
         actions = {}
         for key, dist in distDict.items():
-            elif isinstance(dist, torch.distributions.Bernoulli):
+            if isinstance(dist, torch.distributions.Bernoulli):
                 actions[key] = (dist.logits >0).long()
             elif isinstance(dist, torch.distributions.Normal):
                 actions[key] = dist.mean

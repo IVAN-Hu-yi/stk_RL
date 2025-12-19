@@ -66,7 +66,7 @@ class ppoconfig:
                 "entropy_coef": 0.001,
             },
             "training_config": {
-                "max_epochs": 10000,
+                "max_epochs": 10,
                 "update_interval": update_interval,
                 "batch_size": batch_size
             },

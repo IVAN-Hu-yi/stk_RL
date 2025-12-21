@@ -8,13 +8,13 @@ class ppoconfig:
         Lmax = 32
         sequence_length = 32
         batch_size = 16
-        update_interval = sequence_length * batch_size
+        update_interval = 512
         self.config = {
             "value_config": {
                 "hidden_size": [64, 32],
                 "hidden_activation": ["relu", "relu"],
                 "output_activation": [""],
-                "lr": 1e-4
+                "lr": 1e-5
             },
             "policy_config": {
                 "disc_action": {
@@ -34,7 +34,7 @@ class ppoconfig:
                     "output_activation": [""]
                     },
                 },
-                "lr": 1e-4
+                "lr": 1e-5
             },
             'obsEncoder': {
                 'boxEncoder': {

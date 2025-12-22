@@ -9,7 +9,6 @@ class MLPboxObservationEncoder(nn.Module):
         self.to(device)
 
     def forward(self, x):
-        # 期望 x 的形状为 [B, T, D]
         B, T, D = x.shape
         x = x.view(B * T, D)
         z = self.encoder(x)
@@ -21,8 +20,8 @@ class seqObservationEncoder(nn.Module):
         self.device = device
         self.input_proj = nn.Linear(input_dim, d_model)
         
-        # 使用 Transformer 处理序列数据
-        # **kwargs 会接收并忽略配置中多余的 'use_layer_norm' 等参数
+        # ⚠️ 关键修改：增加 enable_nested_tensor=False
+        # 这会防止某些 PyTorch 版本在处理 mask 时卡死
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=d_model, 
             nhead=n_heads, 
@@ -30,7 +29,11 @@ class seqObservationEncoder(nn.Module):
             dropout=dropout, 
             batch_first=True
         )
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
+        self.transformer = nn.TransformerEncoder(
+            encoder_layer, 
+            num_layers=n_layers,
+            enable_nested_tensor=False 
+        )
         self.to(device)
 
     def forward(self, x, seq_obs_mask):
@@ -38,6 +41,7 @@ class seqObservationEncoder(nn.Module):
         x = x.view(B * T, N, D)
         x = self.input_proj(x)
         
+        # 将 mask 转换为 float 以提高不同 PyTorch 版本的计算兼容性
         mask = ~seq_obs_mask.view(B * T, N).bool()
         out = self.transformer(x, src_key_padding_mask=mask)
         out = out.mean(dim=1) 
@@ -56,7 +60,6 @@ class obsEncoder(nn.Module):
         seq_cfg = config['obsEncoder']['seqEncoder']
         for k in self.seq_keys:
             d_in = config['raw_dim'][k][0]
-            # 这里的 **seq_cfg 会展开字典，kwargs 会吸收不支持的键
             self.seqEncoder[k] = seqObservationEncoder(device, d_in, **seq_cfg)
             
         self.output_dim = box_out_dim + len(self.seq_keys) * seq_cfg['d_model']

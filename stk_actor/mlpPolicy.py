@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributions as D
-from .model_based_utils.mlpfac import MLP
+from .mlpfac import MLP
 
 LOG2 = torch.log(torch.tensor(2.0))
 def cont_log_prob(action, mean, logstd, device, affine_scale=False):

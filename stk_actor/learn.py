@@ -8,8 +8,8 @@ from bbrl.agents.gymnasium import ParallelGymAgent, make_env
 from .actors import Actor
 from .pystk_actor import env_name, get_wrappers, player_name
 from .config import ppoconfig
-from .buffers.sequenceBuffer import sequenceReplayBuffer
-from .buffers.types import Transition, Batch
+from .sequenceBuffer import sequenceReplayBuffer
+from .types import Transition, Batch
 
 try:
     from tqdm.auto import tqdm

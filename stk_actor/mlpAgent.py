@@ -5,11 +5,11 @@ from dataclasses import asdict, is_dataclass
 from collections import defaultdict
 from typing import Dict, Any, Optional, Literal
 
-from .PolicyModule.basePolicyModule import PolicyModule
-from .ValueModule.baseValueModule import ValueModule, QModule, SRModule
-from .buffers.base_buffer import ReplayBuffer
-from .buffers.types import Transition, Batch
-from .algorithm.base import RLAlgorithm
+from .basePolicyModule import PolicyModule
+from .mlpValueNet import ValueModule, QModule, SRModule
+from .basebuffer import ReplayBuffer
+from .types import Transition, Batch
+from .base import RLAlgorithm
 import copy
 
 class baseAgent(nn.Module):

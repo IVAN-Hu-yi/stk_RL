@@ -1,13 +1,13 @@
 import gymnasium as gym
 import torch
-from .bbrl.agents import Agent
-from .ValueModule.mlpValueNet import MLPValueModule
-from .PolicyModule.mlpPolicy import MLPPolicyModule
-from .Encoders.obsEncoders import obsEncoder
-from .buffers.types import Transition, Batch
+
+from .mlpValueNet import MLPValueModule
+from .mlpPolicy import MLPPolicyModule
+from .obsEncoders import obsEncoder
+from .types import Transition, Batch
 import copy
 from .config import ppoconfig
-from .algorithm.base import register_algorithm, get_algorithm
+from .base import register_algorithm, get_algorithm
 
 
 class MyWrapper(gym.ActionWrapper):
@@ -20,7 +20,7 @@ class MyWrapper(gym.ActionWrapper):
         return action
 
 
-class Actor(Agent):
+class Actor(torch.nn.Module):
     """Computes probabilities over action"""
 
     def __init__(self, observation_space, action_space, algo, config, device):
@@ -46,7 +46,7 @@ class Actor(Agent):
         self.set(("distribution", t), distribution)
         return distribution
     
-class ArgmaxActor(Agent):
+class ArgmaxActor(torch.nn.Module):
     """Actor that computes the action"""
 
     def forward(self, t: int, distDict=None):
@@ -64,7 +64,7 @@ class ArgmaxActor(Agent):
                     actions[key] = (torch.tanh(actions[key])+1)/2
         return self.set(("action", t), actions)
 
-class SamplingActor(Agent):
+class SamplingActor(torch.nn.Module):
     """Just sample random actions"""
 
     def __init__(self, action_space: gym.Space):

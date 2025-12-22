@@ -1,9 +1,9 @@
 import torch
 import torch.nn.functional as F
 from .base import RLAlgorithm, register_algorithm
-from .buffers.types import Batch
+from .types import Batch
 from typing import Dict, Any, Tuple
-from .wrappers.obsWrapper import singleObsWrapper
+from .obsWrapper import singleObsWrapper
 
 @register_algorithm('PPO')
 class PPO(RLAlgorithm):

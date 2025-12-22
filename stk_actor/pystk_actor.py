@@ -21,31 +21,42 @@ def get_wrappers() -> List[Callable[[gym.Env], gym.Wrapper]]:
         lambda env: MyWrapper(env, option="1")
     ]
 
-def get_actor(
-    state: dict | None,
-    observation_space: gym.spaces.Space,
-    action_space: gym.spaces.Space,
-    algo,
-    config,
-    device
-) -> Agent:
-    """Creates a new actor (BBRL agent) that write into `action`
+def get_actor(state, observation_space, action_space):
+    import torch
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    :param state: The saved `stk_actor/pystk_actor.pth` (if it exists)
-    :param observation_space: The environment observation space (with wrappers)
-    :param action_space: The environment action space (with wrappers)
-    :return: a BBRL agent
-    """
-    kwargs = {
-        algo: 'PPO',
-        config: config,
-        device: device
+    # === 1. 构造一个最小可用 config dict ===
+    config = {
+        "obsEncoder": {
+            "boxEncoder": {
+                "output_dim": 128,   # ⚠️ 和你训练时一致即可
+            },
+            "seqEncoder": {
+                "d_model": 64,
+            },
+        },
+        "policy": {
+            "hidden_sizes": [256, 256],
+        },
+        "value": {
+            "hidden_sizes": [256, 256],
+        },
     }
-    actor = Actor(observation_space, action_space, **kwargs)
 
-    # Returns a dummy actor
+    from .actors import Actor
+
+    actor = Actor(
+        observation_space=observation_space,
+        action_space=action_space,
+        algo="PPO",
+        config=config,
+        device=device,
+    )
+
     if state is None:
         return SamplingActor(action_space)
 
     actor.load_state_dict(state)
     return Agents(actor, ArgmaxActor())
+
+

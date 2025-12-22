@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import torch
 from dataclasses import asdict, is_dataclass
 from collections import defaultdict
-from .buffers.types import Transition, Batch
+from .types import Transition, Batch
 
 from typing import Dict, Any, Optional, Literal
 from typing import Type, Dict, Any

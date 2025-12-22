@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .model_based_utils.mlpfac import MLP
+from .mlpfac import MLP
 import torch.optim
 
 class MLPValueModule(nn.Module):

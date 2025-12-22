@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .model_based_utils.mlpfac import MLP
+from .mlpfac import MLP
 
 box_obs = ['attachment_time_left', 'aux_ticks', 'center_path', 'center_path_distance', 'distance_down_track', 'energy', 'front', 'max_steer_angle', 'shield_time', 'skeed_factor', 'velocity']
 

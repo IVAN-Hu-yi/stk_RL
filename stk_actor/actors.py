@@ -1,13 +1,13 @@
 import gymnasium as gym
 import torch
-from bbrl.agents import Agent
-from ValueModule.mlpValueNet import MLPValueModule
-from PolicyModule.mlpPolicy import MLPPolicyModule
-from Encoders.obsEncoders import obsEncoder
-from buffers.types import Transition, Batch
+from .bbrl.agents import Agent
+from .ValueModule.mlpValueNet import MLPValueModule
+from .PolicyModule.mlpPolicy import MLPPolicyModule
+from .Encoders.obsEncoders import obsEncoder
+from .buffers.types import Transition, Batch
 import copy
-from config import ppoconfig
-from algorithm.base import register_algorithm, get_algorithm
+from .config import ppoconfig
+from .algorithm.base import register_algorithm, get_algorithm
 
 
 class MyWrapper(gym.ActionWrapper):

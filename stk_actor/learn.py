@@ -7,9 +7,9 @@ from bbrl.agents.gymnasium import ParallelGymAgent, make_env
 # Note the use of relative imports
 from .actors import Actor
 from .pystk_actor import env_name, get_wrappers, player_name
-from config import ppoconfig
-from buffers.sequenceBuffer import sequenceReplayBuffer
-from buffers.types import Transition, Batch
+from .config import ppoconfig
+from .buffers.sequenceBuffer import sequenceReplayBuffer
+from .buffers.types import Transition, Batch
 
 try:
     from tqdm.auto import tqdm
@@ -20,7 +20,7 @@ import time
 from collections import deque, defaultdict
 import re
 
-MAX_CKPTS = 5
+MAX_CKPTS = 10
 ckpt_history = deque(maxlen=MAX_CKPTS)
 
 # 回溯次数统计：同一个ckpt被rollback超过2次就跳过

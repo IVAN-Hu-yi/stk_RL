@@ -4,7 +4,7 @@ import gymnasium as gym
 # Imports our Actor class
 # IMPORTANT: note the relative import
 from .actors import Actor, MyWrapper, ArgmaxActor, SamplingActor
-from config import ppoconfig
+from .config import ppoconfig
 import torch
 
 #: The base environment name (you can change that)

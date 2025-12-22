@@ -6,9 +6,6 @@ from .mlpPolicy import MLPPolicyModule
 from .obsEncoders import obsEncoder
 from .types import Transition, Batch
 import copy
-from .config import ppoconfig
-from .base import register_algorithm, get_algorithm
-
 
 class MyWrapper(gym.ActionWrapper):
     def __init__(self, env, option: int):
@@ -26,25 +23,30 @@ class Actor(torch.nn.Module):
     def __init__(self, observation_space, action_space, algo, config, device):
         super().__init__()
 
-        self.policyHead = MLPPolicyModule(config, device)
-        self.valueNet = MLPValueModule(config, device)
+        self.device = device
+
         self.value_obsEncoder = obsEncoder(config, device)
         self.policy_obsEncoder = obsEncoder(config, device)
+
+        self.policyHead = MLPPolicyModule(config, device)
+        self.valueNet = MLPValueModule(config, device)
 
         # optional
         self.SRNet = None
         self.qNet = None
 
-        AlgorithmClass = get_algorithm(algo)
-        self.algo = AlgorithmClass(agent=self, config=config)
+        self.algo = None
 
     def forward(self, t: int, obs):
-        self.set(("obs", t), obs)
-        outputs = self.algo.select_action(obs, eval_mode=True)
-        distribution = outputs[2]
-        self.set(("action", t), outputs[0])
-        self.set(("distribution", t), distribution)
-        return distribution
+        # encode observation
+        # encode observation
+        policy_latent = self.policy_obsEncoder(obs)
+
+        # compute action distributions
+        distDict = self.policyHead(policy_latent)
+
+        self.set(("distribution", t), distDict)
+        return distDict
     
 class ArgmaxActor(torch.nn.Module):
     """Actor that computes the action"""
